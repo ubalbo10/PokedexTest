@@ -1,7 +1,10 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.kapt") // Plugin kapt
+    id("com.google.dagger.hilt.android") // Plugin de Hilt
 }
+
 
 android {
     namespace = "com.example.pokedex"
@@ -48,6 +51,13 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.converter.gson)
+
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler) // Procesador de anotaciones para Hilt
+
+    // Navegación con Hilt
+    implementation(libs.androidx.hilt.navigation.fragment)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
