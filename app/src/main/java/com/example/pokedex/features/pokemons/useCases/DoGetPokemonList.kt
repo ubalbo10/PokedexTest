@@ -1,18 +1,18 @@
 package com.example.pokedex.features.pokemons.useCases
 
 import androidx.annotation.Keep
+import com.example.pokedex.features.pokemons.data.PokemonListRequest
+import com.example.pokedex.features.pokemons.data.PokemonRepository
+import com.example.pokedex.features.pokemons.data.PokemonResponse
 import net.livinapp.lealtad.core.interactor.UseCaseFlow
-import net.livinapp.lealtad.features.awards.data.Award
-import net.livinapp.lealtad.features.awards.data.AwardRepository
-import net.livinapp.lealtad.features.home.data.ApiResponseBase
 import javax.inject.Inject
 
 class DoGetPokemonList
-@Inject constructor(private val awardRepository: )
-    : UseCaseFlow<ApiResponseBase<Award>, DoGetAward.Params>() {
+@Inject constructor(private val pokemonRepository:PokemonRepository )
+    : UseCaseFlow<List<PokemonResponse>, DoGetPokemonList.Params>() {
 
-    override suspend fun run(params: Params) = awardRepository.getAward(params.id)
+    override suspend fun run(params: Params) = pokemonRepository.getPokemons(params.pokemonListRequest)
 
     @Keep
-    data class Params(val id: Int)
+    data class Params(val pokemonListRequest: PokemonListRequest)
 }
