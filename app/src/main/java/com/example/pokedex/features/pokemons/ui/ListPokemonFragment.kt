@@ -1,140 +1,118 @@
 package com.example.pokedex.features.pokemons.ui
 
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import com.example.pokedex.databinding.FragmentPokemonListBinding import dagger.hilt.android.AndroidEntryPoint
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.pokedex.databinding.FragmentPokemonListBinding
+import com.example.pokedex.features.pokemons.data.Pokemon
+import com.example.pokedex.features.pokemons.data.PokemonListRequest
+import com.example.pokedex.features.pokemons.data.Response
+import com.example.pokedex.features.pokemons.viewModels.PokemonViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import net.livinapp.lealtad.core.common.BaseFragment
 
 @AndroidEntryPoint
 class ListPokemonFragment : BaseFragment() {
     private lateinit var _binding: FragmentPokemonListBinding
-    private val awardViewModel by viewModels<AwardViewModel>()
-    private var points = 0
+    private val pokemonViewModel by viewModels<PokemonViewModel>()
+    private lateinit var pokemonAdapter: PokemonAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentAwardDetailBinding.inflate(inflater)
-        requireActivity().window.statusBarColor =
-            requireActivity().getColor(R.color.primary_accent_dark)
+        _binding = FragmentPokemonListBinding.inflate(inflater)
         initView()
         responseData()
         return _binding.root
     }
 
+    private fun initView() {
+        // Configuración del RecyclerView
+        pokemonAdapter = PokemonAdapter()
+        _binding.recyclerViewPokemon.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = pokemonAdapter
+        }
+
+        // Hacer la petición para obtener los Pokémon
+        val request = PokemonListRequest(
+            offset = 0,
+            limit = 20
+        )
+        pokemonViewModel.getPokemons(request)
+    }
+
     private fun responseData() {
-        with(awardViewModel) {
-            awardState.observe(viewLifecycleOwner) { resp ->
+        with(pokemonViewModel) {
+            // Observar la respuesta de la lista de Pokémon
+            pokemonListState.observe(viewLifecycleOwner) { resp ->
                 when (resp) {
                     is Response.Loading -> {
                         showLoadingDialog()
                     }
 
+
                     is Response.Success -> {
                         hideLoadingDialog()
-                        val resultAward = resp.data?.result
-                        if (resultAward != null) {
-                            award = resultAward
-                            debug("Award  $award")
-                            initData(award)
-                            val currentPoints: Int = points
-                            if (currentPoints >= resultAward.points!!) {
-                                val qr = resultAward.qr ?: ""
-                                val qrCode: QRCode =
-                                    QRCode.from(qr)
-                                qrCode.withSize(250, 250) // Ajustar el tamanio del qr
-                                val bitmap: Bitmap = qrCode.bitmap()
-                                _binding.imgQr.setImageBitmap(bitmap)
-                                _binding.contentQr.show()
-                                _binding.withoutQR.hide()
+                        val response = resp.data
+                        if (response != null) {
+                            // Aquí cargas la lista de pokemones obtenidos
+                            val pokemonList = response.results
+                            if (pokemonList != null) {
+                                loadPokemonDetails(pokemonList)
+                            }  // Carga los detalles de cada pokemon
 
-                            } else {
-                                _binding.withoutQR.show()
-                                _binding.contentQr.hide()
+                            // Manejar la siguiente página si existe
+                            val nextUrl = response.next
+                            if (nextUrl != null) {
+                                // Si hay más pokemones, haz una llamada para obtenerlos
+                                loadNextPage(nextUrl)
                             }
-                        } else {
-                            val errorMessage = getString(
-                                R.string.error_login_default_error
-                            )
-                            showAlert(
-                                requireContext(),
-                                getString(R.string.error_title_alert),
-                                errorMessage
-                            )
                         }
                     }
 
                     is Response.Error -> {
                         hideLoadingDialog()
-                        when (resp.exception) {
-                            is AwardNotFoundException -> {
-                                val error = (resp.message)
-                                showAlert(
-                                    requireContext(),
-                                    getString(R.string.error_title_alert),
-                                    error
-                                )
-                            }
+                        // Mostrar mensaje de error
+                    }
+                }
+            }
 
-                            is ErrorServerApiException -> {
-                                val error = (resp.message)
-                                showAlert(
-                                    requireContext(),
-                                    getString(R.string.error_title_alert),
-                                    error
-                                )
-                            }
+            // Observar la respuesta de los detalles de los Pokémon
+            pokemonDetailState.observe(viewLifecycleOwner) { resp ->
+                when (resp) {
+                    is Response.Loading -> {
+                        // Mostrar loading
+                    }
 
-                            else -> {
-                                val error = (resp.message)
-                                showAlert(
-                                    requireContext(),
-                                    getString(R.string.error_title_alert),
-                                    error
-                                )
-                            }
+                    is Response.Success -> {
+                        val response = resp.data
+                        if (response != null) {
+                            // Actualizar la imagen del Pokémon correspondiente
+                            pokemonAdapter.updatePokemonImage(response)
                         }
                     }
 
-                    else -> {}
+                    is Response.Error -> {
+                        // Mostrar mensaje de error
+                    }
                 }
             }
         }
     }
 
-    private fun initView() {
-        _binding.apply {
-            imageBack.setOnClickListener {
-                findNavController().popBackStack()
-            }
-            home.setOnClickListener {
-                findNavController().navigate(R.id.homeMultiFragment)
-            }
+    private fun loadPokemonDetails(pokemonList: List<Pokemon>) {
+        pokemonList.forEach { pokemon ->
+            //pokemonViewModel.getPokemonDetail(pokemon.url)  // Llamar para obtener detalles (incluyendo imagen)
         }
-        award = Gson().fromJson(args.award, Award::class.java)
-        points = args.points
-
-        awardViewModel.getAward(award.id ?: 0)
-        //initData(award)
     }
 
-    private fun initData(award: Award) {
-        _binding.apply {
-            imgProduct.load(award.image ?: "")
-            txvPoints.text = getString(R.string.current_points, award.points)
-            txvProductName.text = award.name ?: ""
-            txvProductBrand.text = award.brand ?: ""
-            txvCodeQr.text = getString(R.string.code_qr, award.sku)
-            txvProductExpirationDate.text = award.expirationDate?.let { formatDate(it) }
-            txvProductDescription.text = award.description ?: ""
-            val mAdapter = InventoryAdapter(award.inventories as MutableList<Inventory>)
-            listBranchOffice.adapter = mAdapter
-        }
+    private fun loadNextPage(url: String) {
+        // Realiza la llamada para obtener la siguiente página de pokemones
+        //pokemonViewModel.getPokemonList(url)
     }
 }

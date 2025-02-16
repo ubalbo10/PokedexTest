@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 interface PokemonRepository {
 
-    suspend fun getPokemons(planes: PokemonListRequest): Flow<Response<List<PokemonResponse>>>
+    suspend fun getPokemons(planes: PokemonListRequest): Flow<Response<PokemonPaginatedResponse>>
     suspend fun getPokemonDetail(planes: PokemonDetailRequest): Flow<Response<PokemonDetailResponse>>
 
     class Network
@@ -19,11 +19,11 @@ interface PokemonRepository {
 
 
 
-        override suspend fun getPokemons(planes: PokemonListRequest)=
-            flow<Response<List<PokemonResponse>>> {
+        override suspend fun getPokemons(request: PokemonListRequest)=
+            flow<Response<PokemonPaginatedResponse>> {
                 try {
                     emit(Response.Loading)
-                    val response = service.getPokemonList(planes.id?.toInt()?:0).awaitResponse()
+                    val response = service.getPokemonList(request.offset,request.limit).awaitResponse()
                     if (response.isSuccessful) {
                         response.body()?.let {
                             emit(Response.Success(it))

@@ -52,7 +52,10 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.converter.gson)
-
+    implementation( libs.kotlinx.coroutines.core)
+    implementation (libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.glide)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler) // Procesador de anotaciones para Hilt
 

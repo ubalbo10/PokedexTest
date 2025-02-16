@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.example.pokedex.ui.home.HomeFragment"
+        android:name="com.example.pokedex.features.pokemons.ui.ListPokemonFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" />
 

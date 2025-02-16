@@ -4,7 +4,7 @@ import androidx.annotation.Keep
 import com.example.pokedex.features.pokemons.data.PokemonDetailRequest
 import com.example.pokedex.features.pokemons.data.PokemonDetailResponse
 import com.example.pokedex.features.pokemons.data.PokemonRepository
-import net.livinapp.lealtad.core.interactor.UseCaseFlow
+import com.example.pokedex.core.interactor.UseCaseFlow
 import javax.inject.Inject
 
 class DoGetPokemonDetail

@@ -4,8 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.view.LayoutInflater
 import com.example.pokedex.R
-import net.livinapp.lealtad.R
-import net.livinapp.lealtad.databinding.ViewLoadingBinding
+import com.example.pokedex.databinding.ViewLoadingBinding
 
 class LoadingDialog private constructor(context: Context) {
 
