@@ -8,6 +8,7 @@ import com.example.pokedex.features.pokemons.data.PokemonDetailRequest
 import com.example.pokedex.features.pokemons.data.PokemonDetailResponse
 import com.example.pokedex.features.pokemons.data.PokemonListRequest
 import com.example.pokedex.features.pokemons.data.PokemonPaginatedResponse
+import com.example.pokedex.features.pokemons.data.PokemonRepository
 import com.example.pokedex.features.pokemons.data.Response
 import com.example.pokedex.features.pokemons.useCases.DoGetPokemonList
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class PokemonViewModel
 @Inject constructor(
+    private val pokemonRepository: PokemonRepository,
+
     private val doGetpokemonList: DoGetPokemonList,
 ): ViewModel(){
     private val _pokemonList = MutableLiveData<Response<PokemonPaginatedResponse>>(Response.Loading)
@@ -25,7 +28,9 @@ class PokemonViewModel
     private val _pokemonDetail = MutableLiveData<Response<PokemonDetailResponse>>(Response.Loading)
     val pokemonDetailState: LiveData<Response<PokemonDetailResponse>> = _pokemonDetail
 
-
+    fun getPokemonsCount(): Int {
+        return pokemonRepository.getPokemonsCount()
+    }
 
 
 
@@ -37,6 +42,7 @@ class PokemonViewModel
                 }
             }
         }
+
 
 
 

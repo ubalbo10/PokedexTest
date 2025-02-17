@@ -1,10 +1,18 @@
 package com.example.pokedex.features.pokemons.ui
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,6 +31,7 @@ class ListPokemonFragment : BaseFragment() {
     private lateinit var _binding: FragmentPokemonListBinding
     private val pokemonViewModel by viewModels<PokemonViewModel>()
     private lateinit var pokemonAdapter: PokemonAdapter
+    private val notificationChannelId = "pokemon_updates_channel"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,6 +39,7 @@ class ListPokemonFragment : BaseFragment() {
     ): View {
         _binding = FragmentPokemonListBinding.inflate(inflater)
         initView()
+        requestNotificationPermission()
         responseData()
         return _binding.root
     }
@@ -37,6 +47,7 @@ class ListPokemonFragment : BaseFragment() {
     private fun initView() {
         // Configuración del RecyclerView
         pokemonAdapter = PokemonAdapter()
+        startPokemonUpdate()
         _binding.recyclerViewPokemon.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = pokemonAdapter
@@ -50,6 +61,7 @@ class ListPokemonFragment : BaseFragment() {
         pokemonViewModel.getPokemons(request)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun responseData() {
         with(pokemonViewModel) {
             // Observar la respuesta de la lista de Pokémon
@@ -67,6 +79,7 @@ class ListPokemonFragment : BaseFragment() {
                             // Aquí cargas la lista de pokemones obtenidos
                             val pokemonList = response.results
                             if (pokemonList != null) {
+                                showNotification("La lista de Pokémon ha sido actualizada.")
                                 updateReciclerView(pokemonList)
                             }  // Carga los detalles de cada pokemon
 
@@ -74,10 +87,7 @@ class ListPokemonFragment : BaseFragment() {
                             val nextUrl = response.next
                             if (nextUrl != null) {
                                 lifecycleScope.launch {
-                                    delay(5000)
-                                    // Si hay más pokemones, haz una llamada para obtenerlos
 
-                                    loadNextPage(nextUrl)
                                 }
 
                             }
@@ -118,6 +128,71 @@ class ListPokemonFragment : BaseFragment() {
         } else {
             null // Devuelve null si no se pueden extraer los valores
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun startPokemonUpdate() {
+        lifecycleScope.launch {
+            while (true) {
+                // Esperar 30 segundos antes de hacer la actualización
+                delay(3000) // 30 segundos
+
+                // Obtener los Pokémon con un nuevo offset basado en la lista actual
+                val currentPokemonCount = pokemonAdapter.itemCount
+                val request = PokemonListRequest(
+                    offset = currentPokemonCount,
+                    limit = 10
+                )
+
+                // Realizar la actualización de los Pokémon
+                pokemonViewModel.getPokemons(request)
+
+
+            }
+        }
+    }
+
+    private fun showNotification(message: String) {
+        // Crear un canal de notificación (Requerido desde Android 8.0)
+        val channel = NotificationChannel(
+            notificationChannelId,
+            "Pokemon Updates",
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = "Canal para actualizaciones de Pokémon"
+        }
+
+        val notificationManager = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+
+        // Crear la notificación
+        val notification = android.app.Notification.Builder(requireContext(), notificationChannelId)
+            .setContentTitle("Actualización Pokémon")
+            .setContentText(message)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .build()
+
+        notificationManager.notify(1, notification)
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Verifica si ya tenemos el permiso
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED) {
+                // Si no tiene el permiso, solicitamos el permiso
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    REQUEST_CODE_PERMISSION
+                )
+            }
+        }
+    }
+    companion object {
+        private const val REQUEST_CODE_PERMISSION = 1001
     }
 
 }
