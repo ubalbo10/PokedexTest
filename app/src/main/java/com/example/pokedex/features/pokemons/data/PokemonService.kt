@@ -11,7 +11,7 @@ class PokemonService
     private val pokemonApi by lazy { retrofit.create(PokemonApi::class.java) }
     override fun getPokemonList(offset : Int, limit:Int): Call<PokemonPaginatedResponse> = pokemonApi.getPokemonList(offset,limit)
 
-    override fun getPokemonDetail(plan: Int): Call<PokemonDetailResponse> = pokemonApi.getPokemonDetail(plan)
+    override fun getPokemonDetail(url: String): Call<Pokemon> = pokemonApi.getPokemonDetail(url)
 
 
 }

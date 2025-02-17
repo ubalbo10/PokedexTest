@@ -9,7 +9,6 @@ import com.example.pokedex.features.pokemons.data.PokemonDetailResponse
 import com.example.pokedex.features.pokemons.data.PokemonListRequest
 import com.example.pokedex.features.pokemons.data.PokemonPaginatedResponse
 import com.example.pokedex.features.pokemons.data.Response
-import com.example.pokedex.features.pokemons.useCases.DoGetPokemonDetail
 import com.example.pokedex.features.pokemons.useCases.DoGetPokemonList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -19,7 +18,6 @@ import javax.inject.Inject
 class PokemonViewModel
 @Inject constructor(
     private val doGetpokemonList: DoGetPokemonList,
-    private val doGetpokemonDetail: DoGetPokemonDetail
 ): ViewModel(){
     private val _pokemonList = MutableLiveData<Response<PokemonPaginatedResponse>>(Response.Loading)
     val pokemonListState: LiveData<Response<PokemonPaginatedResponse>> = _pokemonList
@@ -40,14 +38,6 @@ class PokemonViewModel
             }
         }
 
-    fun getPokemonDetail(id: PokemonDetailRequest) =
-        doGetpokemonDetail(DoGetPokemonDetail.Params(id)) { useCase ->
-            viewModelScope.launch {
-                useCase.collect{ response ->
-                    _pokemonDetail.value = response
-                }
-            }
-        }
 
 
 

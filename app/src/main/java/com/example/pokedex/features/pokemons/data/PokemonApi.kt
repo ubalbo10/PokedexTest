@@ -7,6 +7,7 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Url
 
 interface PokemonApi {
     companion object {
@@ -23,7 +24,7 @@ interface PokemonApi {
             : Call<PokemonPaginatedResponse>
 
     @Headers(ApiConfig.CONTENT_TYPE_JSON)
-    @GET(DETAIL_POKEMON)
-    fun getPokemonDetail(@Path("plan") plan: Int)
-            : Call<PokemonDetailResponse>
+    @GET
+    fun getPokemonDetail(@Url url: String): Call<Pokemon>
+
 }

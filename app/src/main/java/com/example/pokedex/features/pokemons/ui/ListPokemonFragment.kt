@@ -1,10 +1,12 @@
 package com.example.pokedex.features.pokemons.ui
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.pokedex.databinding.FragmentPokemonListBinding
 import com.example.pokedex.features.pokemons.data.Pokemon
@@ -12,6 +14,8 @@ import com.example.pokedex.features.pokemons.data.PokemonListRequest
 import com.example.pokedex.features.pokemons.data.Response
 import com.example.pokedex.features.pokemons.viewModels.PokemonViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.livinapp.lealtad.core.common.BaseFragment
 
 @AndroidEntryPoint
@@ -41,7 +45,7 @@ class ListPokemonFragment : BaseFragment() {
         // Hacer la petición para obtener los Pokémon
         val request = PokemonListRequest(
             offset = 0,
-            limit = 20
+            limit = 15
         )
         pokemonViewModel.getPokemons(request)
     }
@@ -63,14 +67,19 @@ class ListPokemonFragment : BaseFragment() {
                             // Aquí cargas la lista de pokemones obtenidos
                             val pokemonList = response.results
                             if (pokemonList != null) {
-                                loadPokemonDetails(pokemonList)
+                                updateReciclerView(pokemonList)
                             }  // Carga los detalles de cada pokemon
 
                             // Manejar la siguiente página si existe
                             val nextUrl = response.next
                             if (nextUrl != null) {
-                                // Si hay más pokemones, haz una llamada para obtenerlos
-                                loadNextPage(nextUrl)
+                                lifecycleScope.launch {
+                                    delay(5000)
+                                    // Si hay más pokemones, haz una llamada para obtenerlos
+
+                                    loadNextPage(nextUrl)
+                                }
+
                             }
                         }
                     }
@@ -82,37 +91,33 @@ class ListPokemonFragment : BaseFragment() {
                 }
             }
 
-            // Observar la respuesta de los detalles de los Pokémon
-            pokemonDetailState.observe(viewLifecycleOwner) { resp ->
-                when (resp) {
-                    is Response.Loading -> {
-                        // Mostrar loading
-                    }
-
-                    is Response.Success -> {
-                        val response = resp.data
-                        if (response != null) {
-                            // Actualizar la imagen del Pokémon correspondiente
-                            pokemonAdapter.updatePokemonImage(response)
-                        }
-                    }
-
-                    is Response.Error -> {
-                        // Mostrar mensaje de error
-                    }
-                }
-            }
         }
     }
 
-    private fun loadPokemonDetails(pokemonList: List<Pokemon>) {
-        pokemonList.forEach { pokemon ->
-            //pokemonViewModel.getPokemonDetail(pokemon.url)  // Llamar para obtener detalles (incluyendo imagen)
-        }
+    private fun updateReciclerView(pokemons : List<Pokemon>){
+        pokemonAdapter.addPokemons(pokemons)
+
     }
 
     private fun loadNextPage(url: String) {
+        val request = parseNextUrl(url)
         // Realiza la llamada para obtener la siguiente página de pokemones
-        //pokemonViewModel.getPokemonList(url)
+        if (request != null) {
+            pokemonViewModel.getPokemons(
+                request
+            )
+        }
     }
+    fun parseNextUrl(nextUrl: String): PokemonListRequest? {
+        val uri = Uri.parse(nextUrl) // Usa Uri para analizar la URL
+        val offset = uri.getQueryParameter("offset")?.toIntOrNull()
+        val limit = uri.getQueryParameter("limit")?.toIntOrNull()
+
+        return if (offset != null && limit != null) {
+            PokemonListRequest(offset, limit)
+        } else {
+            null // Devuelve null si no se pueden extraer los valores
+        }
+    }
+
 }

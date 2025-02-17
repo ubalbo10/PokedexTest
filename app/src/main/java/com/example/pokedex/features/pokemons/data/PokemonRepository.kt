@@ -10,7 +10,6 @@ import javax.inject.Inject
 interface PokemonRepository {
 
     suspend fun getPokemons(planes: PokemonListRequest): Flow<Response<PokemonPaginatedResponse>>
-    suspend fun getPokemonDetail(planes: PokemonDetailRequest): Flow<Response<PokemonDetailResponse>>
 
     class Network
     @Inject constructor(
@@ -22,11 +21,27 @@ interface PokemonRepository {
         override suspend fun getPokemons(request: PokemonListRequest)=
             flow<Response<PokemonPaginatedResponse>> {
                 try {
+                    val pokemonList = mutableListOf<Pokemon>()
+
                     emit(Response.Loading)
                     val response = service.getPokemonList(request.offset,request.limit).awaitResponse()
                     if (response.isSuccessful) {
-                        response.body()?.let {
-                            emit(Response.Success(it))
+                        response.body()?.results.let {
+                            it?.forEach {
+                                val detailResponse = service.getPokemonDetail(it.url?:"").awaitResponse()
+                                // Aquí manejas la respuesta con los detalles del Pokémon
+                                if (detailResponse.isSuccessful) {
+                                    val pokemonDetail = detailResponse.body()
+                                    pokemonDetail?.let {
+                                        pokemonList.add(it)
+                                    }
+                                }
+                            }
+                            val responsePokemons =response.body()
+                            responsePokemons?.results = pokemonList
+
+
+                            emit(Response.Success(responsePokemons))
                         }
                     } else {
                         when (response.code()) {
@@ -47,31 +62,6 @@ interface PokemonRepository {
 
 
 
-        override suspend fun getPokemonDetail(planes: PokemonDetailRequest) =
-            flow<Response<PokemonDetailResponse>> {
-                try {
-                    emit(Response.Loading)
-                    val response = service.getPokemonDetail(planes.id?.toInt()?:0).awaitResponse()
-                    if (response.isSuccessful) {
-                        response.body()?.let {
-                            emit(Response.Success(it))
-                        }
-                    } else {
-                        when (response.code()) {
-
-                            500 -> emit(
-                                Response.Error(
-                                    "Error de servidor",
-                                )
-                            )
-                            else -> emit(Response.Error("Error no manejado"))
-                        }
-                    }
-                }  catch (e: Exception) {
-                    //emit(Response.Error(e.message.toString()))
-                    e.printStackTrace()
-                }
-            }
         }
     }
 

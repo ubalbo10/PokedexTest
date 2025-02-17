@@ -8,10 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.pokedex.databinding.ItemPokemonBinding
 import com.example.pokedex.features.pokemons.data.Pokemon
-import com.example.pokedex.features.pokemons.data.PokemonDetailResponse
 
 class PokemonAdapter : ListAdapter<Pokemon, PokemonAdapter.PokemonViewHolder>(PokemonDiffCallback()) {
-    private val pokemonImages = mutableMapOf<String, String>()
+    private val currentList = mutableListOf<Pokemon>() // Mantiene la lista actual de Pokémon
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PokemonViewHolder {
         val binding = ItemPokemonBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -19,25 +18,30 @@ class PokemonAdapter : ListAdapter<Pokemon, PokemonAdapter.PokemonViewHolder>(Po
     }
 
     override fun onBindViewHolder(holder: PokemonViewHolder, position: Int) {
-        val pokemon = getItem(position)
-        holder.bind(pokemon, pokemonImages[pokemon.image])
+        val pokemon = currentList[position]
+        holder.bind(pokemon)
     }
 
-    fun updatePokemonImage(detail: PokemonDetailResponse) {
-        // update image in map
-        pokemonImages[detail.id?:""] = detail.url ?: ""
-        notifyDataSetChanged()
+    override fun getItemCount(): Int {
+        return currentList.size
+    }
+
+    /**
+     * Agrega más Pokémon a la lista y notifica al adapter
+     */
+    fun addPokemons(newPokemons: List<Pokemon>) {
+        val startIndex = currentList.size
+        currentList.addAll(newPokemons)
+        notifyItemRangeInserted(startIndex, newPokemons.size) // Notifica solo los nuevos elementos
     }
 
     inner class PokemonViewHolder(private val binding: ItemPokemonBinding) : RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(pokemon: Pokemon, imageUrl: String?) {
+        fun bind(pokemon: Pokemon) {
             binding.textViewPokemonName.text = pokemon.name
-            if (imageUrl != null) {
-                Glide.with(binding.imageViewPokemon.context)
-                    .load(imageUrl)
-                    .into(binding.imageViewPokemon)
-            }
+            Glide.with(binding.imageViewPokemon.context)
+                .load(pokemon.sprites?.image) // Usa la URL de la imagen del Pokémon
+                .placeholder(com.example.pokedex.R.drawable.ic_launcher_background) // Imagen de carga
+                .into(binding.imageViewPokemon)
         }
     }
 
