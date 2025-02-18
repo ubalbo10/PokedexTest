@@ -33,11 +33,36 @@ class PokemonDatabaseTest {
     @Test
     fun testInsertAndGetPokemon() = runBlocking {
         val pokemon = PokemonRoom(id = 1, name = "Bulbasaur", url = "https://pokeapi.co/api/v2/pokemon/1/")
-        val p = pokemonDao.insertAll(pokemon)
+        pokemonDao.insertAll(pokemon)
 
         // Comprobar si se ha insertado correctamente
         //val retrievedPokemon = pokemonDao.getPokemonById(1)
         assertThat(pokemonDao.getAllPokemons().first().name, `is`("Bulbasaur"))
+    }
+
+    @Test
+    fun testInsertAndGetAllPokemons() = runBlocking {
+        // Crear una lista de pokémones para insertar
+        val pokemonList = listOf(
+            PokemonRoom(name = "Bulbasaur", url = "https://pokeapi.co/api/v2/pokemon/1/"),
+            PokemonRoom(name = "Charmander", url = "https://pokeapi.co/api/v2/pokemon/4/"),
+            PokemonRoom(name = "Squirtle", url = "https://pokeapi.co/api/v2/pokemon/7/")
+        )
+
+        // Insertar los pokémones en la base de datos
+        pokemonDao.insertAll(*pokemonList.toTypedArray())
+
+        // Recuperar los pokémones desde la base de datos
+        val retrievedPokemons = pokemonDao.getAllPokemons()
+
+        // Verificar que el tamaño de la lista sea el correcto
+        assertThat(retrievedPokemons.size, `is`(pokemonList.size))
+
+        // Verificar que los datos insertados sean los mismos que los recuperados
+        for (i in pokemonList.indices) {
+            assertThat(retrievedPokemons[i].name, `is`(pokemonList[i].name))
+            assertThat(retrievedPokemons[i].url, `is`(pokemonList[i].url))
+        }
     }
 
     @After
