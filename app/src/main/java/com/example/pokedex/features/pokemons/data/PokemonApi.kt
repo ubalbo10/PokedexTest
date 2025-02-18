@@ -12,7 +12,6 @@ import retrofit2.http.Url
 interface PokemonApi {
     companion object {
         private const val POKEMONS = "pokemon"
-        private const val DETAIL_POKEMON = "filtros/{plan}"
     }
 
     @Headers(ApiConfig.CONTENT_TYPE_JSON)

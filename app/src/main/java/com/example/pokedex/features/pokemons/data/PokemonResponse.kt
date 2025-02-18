@@ -1,5 +1,6 @@
 package com.example.pokedex.features.pokemons.data
 
+import androidx.room.Entity
 import com.google.gson.annotations.SerializedName
 
 data class PokemonPaginatedResponse(

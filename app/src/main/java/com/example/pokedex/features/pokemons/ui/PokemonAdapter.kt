@@ -40,7 +40,7 @@ class PokemonAdapter : ListAdapter<Pokemon, PokemonAdapter.PokemonViewHolder>(Po
             binding.textViewPokemonName.text = pokemon.name
             Glide.with(binding.imageViewPokemon.context)
                 .load(pokemon.sprites?.image) // Usa la URL de la imagen del Pokémon
-                .placeholder(com.example.pokedex.R.drawable.ic_launcher_background) // Imagen de carga
+                .placeholder(com.example.pokedex.R.drawable.pokemon) // Imagen de carga
                 .into(binding.imageViewPokemon)
         }
     }

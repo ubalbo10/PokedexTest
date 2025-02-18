@@ -3,9 +3,9 @@ package com.example.pokedex
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.pokedex.features.pokemons.data.Pokemon
 import com.example.pokedex.features.pokemons.data.PokemonDao
 import com.example.pokedex.features.pokemons.data.PokemonDatabase
+import com.example.pokedex.features.pokemons.data.PokemonRoom
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -32,12 +32,12 @@ class PokemonDatabaseTest {
 
     @Test
     fun testInsertAndGetPokemon() = runBlocking {
-        val pokemon = Pokemon(id = 1, name = "Bulbasaur", url = "https://pokeapi.co/api/v2/pokemon/1/")
-        pokemonDao.insertPokemon(pokemon)
+        val pokemon = PokemonRoom(id = 1, name = "Bulbasaur", url = "https://pokeapi.co/api/v2/pokemon/1/")
+        val p = pokemonDao.insertAll(pokemon)
 
         // Comprobar si se ha insertado correctamente
-        val retrievedPokemon = pokemonDao.getPokemonById(1)
-        assertThat(retrievedPokemon?.name, `is`("Bulbasaur"))
+        //val retrievedPokemon = pokemonDao.getPokemonById(1)
+        assertThat(pokemonDao.getAllPokemons().first().name, `is`("Bulbasaur"))
     }
 
     @After
