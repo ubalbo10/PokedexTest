@@ -1,10 +1,10 @@
 package net.livinapp.lealtad.core.interactor
 
+import com.example.pokedex.features.pokemons.data.Response
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import net.livinapp.lealtad.features.auth.data.Response
 /**
  * Abstract class for a Use Case (Interactor in terms of Clean Architecture).
  * This abstraction represents an execution unit for different use cases (this means than any use

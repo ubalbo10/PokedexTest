@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("kotlin-kapt")
     id("org.jetbrains.kotlin.kapt") // Plugin kapt
     id("com.google.dagger.hilt.android") // Plugin de Hilt
 }
@@ -12,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.pokedex"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -52,12 +53,23 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.converter.gson)
-
+    implementation( libs.kotlinx.coroutines.core)
+    implementation (libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.glide)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.common)
     kapt(libs.hilt.compiler) // Procesador de anotaciones para Hilt
 
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    kapt(libs.room.compiler)
     // Navegación con Hilt
     implementation(libs.androidx.hilt.navigation.fragment)
+
+    // WorkManager para tareas en segundo plano
+    implementation( libs.androidx.work.runtime)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

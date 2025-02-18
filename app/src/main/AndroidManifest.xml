@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".core.AndroidApplication"
@@ -13,6 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pokedex"
         tools:targetApi="31">
+        <service android:name=".features.pokemons.PokemonUpdateService" />
+
         <activity
             android:name=".features.pokemons.ui.MainActivity"
             android:exported="true"

@@ -1,11 +1,11 @@
-package net.livinapp.lealtad.core.interactor
+package com.example.pokedex.core.interactor
 
+import com.example.pokedex.features.pokemons.data.Response
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import net.livinapp.lealtad.features.auth.data.Response
 
 abstract class UseCaseFlow<out Type, in Params> where Type : Any  {
 
